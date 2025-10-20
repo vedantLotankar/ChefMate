@@ -34,7 +34,7 @@ const HomeStack = () => {
         name="RecipeDetail" 
         component={RecipeDetailScreen}
         options={{
-          headerShown: true,
+          headerShown: false,
           headerStyle: {
             backgroundColor: COLORS.surface,
           },
