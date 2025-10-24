@@ -128,7 +128,7 @@ export const APP_CONFIG = {
   name: 'ChefMate',
   version: '1.0.0',
   maxImageSize: 5 * 1024 * 1024, // 5MB
-  supportedImageTypes: ['jpg', 'jpeg', 'png', 'webp'],
+  supportedImageTypes: ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'],
   maxRecipeSteps: 50,
   maxIngredients: 50,
   maxChatHistory: 100,
