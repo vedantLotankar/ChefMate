@@ -15,7 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList, Recipe } from '../api/types';
 import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../utils/constants';
 import { createStyles, typography } from '../utils/styles';
-import { getRecipeById } from '../utils/dummyRecipes';
 import { useRecipeStore } from '../store/useRecipeStore';
 
 type RecipeDetailScreenNavigationProp = StackNavigationProp<RootStackParamList, 'RecipeDetail'>;
@@ -36,6 +35,9 @@ export default function RecipeDetailScreen({ navigation, route }: Props) {
     setCurrentRecipe,
     setCurrentServings,
     adjustServings,
+    favorites,
+    toggleFavorite,
+    getRecipeById,
   } = useRecipeStore();
 
   useEffect(() => {
@@ -68,13 +70,12 @@ export default function RecipeDetailScreen({ navigation, route }: Props) {
   };
 
   const handleFavoritePress = () => {
-    // TODO: Implement favorite functionality
-    Alert.alert('Favorite', 'Favorite functionality coming soon!');
+    toggleFavorite(recipeId);
   };
 
   const handleSharePress = () => {
     // TODO: Implement share functionality
-    Alert.alert('Share', 'Share functionality coming soon!');
+    Alert.alert('Share nahi chalta', 'Share functionality sai ya athu implement karenge');
   };
 
   const handleStartCooking = () => {
@@ -217,7 +218,11 @@ export default function RecipeDetailScreen({ navigation, route }: Props) {
         
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.headerButton} onPress={handleFavoritePress}>
-            <Ionicons name="heart-outline" size={24} color={COLORS.text} />
+            <Ionicons
+              name={favorites.includes(recipeId) ? 'heart' : 'heart-outline'}
+              size={24}
+              color={favorites.includes(recipeId) ? COLORS.error : COLORS.text}
+            />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton} onPress={handleSharePress}>
             <Ionicons name="share-outline" size={24} color={COLORS.text} />
