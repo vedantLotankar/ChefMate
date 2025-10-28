@@ -1,240 +1,104 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { CookingStep } from '../api/types';
-import { COLORS, SPACING, BORDER_RADIUS, FONT_SIZES, FONT_WEIGHTS, BLUR_CONFIG } from '../utils/constants';
-import { createStyles, commonStyles, typography } from '../utils/styles';
 
-interface StepCardProps {
-  step: CookingStep;
-  isActive: boolean;
-  isCompleted: boolean;
-  style?: any;
+interface Ingredient {
+  name: string;
+  quantity: string;
 }
 
-export const StepCard: React.FC<StepCardProps> = ({
-  step,
-  isActive,
-  isCompleted,
-  style,
-}) => {
-  const formatDuration = (minutes?: number) => {
-    if (!minutes) return null;
-    if (minutes < 60) {
-      return `${minutes}m`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
-  };
+interface Props {
+  title: string;
+  description: string;
+  time: string;
+  ingredients: Ingredient[];
+}
 
-  const getStepIcon = () => {
-    if (isCompleted) {
-      return 'checkmark-circle';
-    }
-    if (isActive) {
-      return 'play-circle';
-    }
-    return 'ellipse-outline';
-  };
-
-  const getStepIconColor = () => {
-    if (isCompleted) {
-      return COLORS.success;
-    }
-    if (isActive) {
-      return COLORS.primary;
-    }
-    return COLORS.textSecondary;
-  };
-
-  const getCardBackgroundColor = () => {
-    if (isActive) {
-      return COLORS.primary + '10';
-    }
-    if (isCompleted) {
-      return COLORS.success + '10';
-    }
-    return COLORS.surface;
-  };
-
+const StepCard: React.FC<Props> = ({ title, description, time, ingredients }) => {
   return (
-    <View style={[styles.container, style]}>
-      {BLUR_CONFIG.enabled ? (
-        <BlurView
-          intensity={BLUR_CONFIG.intensities.medium}
-          tint={BLUR_CONFIG.tints.light}
-          style={[
-            styles.blurContainer,
-            { backgroundColor: getCardBackgroundColor() }
-          ]}
-        >
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <View style={styles.stepNumberContainer}>
-                <Ionicons
-                  name={getStepIcon()}
-                  size={24}
-                  color={getStepIconColor()}
-                />
-                <Text style={[styles.stepNumber, { color: getStepIconColor() }]}>
-                  {step.stepNumber}
-                </Text>
-              </View>
-              
-              <View style={styles.metaContainer}>
-                {step.duration && (
-                  <View style={styles.durationContainer}>
-                    <Ionicons name="time-outline" size={16} color={COLORS.textSecondary} />
-                    <Text style={styles.durationText}>
-                      {formatDuration(step.duration)}
-                    </Text>
-                  </View>
-                )}
-                
-                {step.temperature && (
-                  <View style={styles.temperatureContainer}>
-                    <Ionicons name="thermometer-outline" size={16} color={COLORS.textSecondary} />
-                    <Text style={styles.temperatureText}>
-                      {step.temperature}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-            
-            <Text style={[
-              styles.description,
-              isActive && styles.descriptionActive,
-              isCompleted && styles.descriptionCompleted,
-            ]}>
-              {step.description}
-            </Text>
+    <View style={styles.card}>
+      <View style={styles.left}>
+        <Text style={styles.stepTitle}>{title}</Text>
+        <Text style={styles.stepDesc}>{description}</Text>
+        {ingredients.map((item, index) => (
+          <View key={index} style={styles.ingredientRow}>
+            <Text style={styles.ingredient}>{item.name}</Text>
+            <Text style={styles.quantity}>{item.quantity}</Text>
           </View>
-        </BlurView>
-      ) : (
-        <View style={[
-          styles.fallbackContainer,
-          { backgroundColor: getCardBackgroundColor() }
-        ]}>
-          <View style={styles.content}>
-            <View style={styles.header}>
-              <View style={styles.stepNumberContainer}>
-                <Ionicons
-                  name={getStepIcon()}
-                  size={24}
-                  color={getStepIconColor()}
-                />
-                <Text style={[styles.stepNumber, { color: getStepIconColor() }]}>
-                  {step.stepNumber}
-                </Text>
-              </View>
-              
-              <View style={styles.metaContainer}>
-                {step.duration && (
-                  <View style={styles.durationContainer}>
-                    <Ionicons name="time-outline" size={16} color={COLORS.textSecondary} />
-                    <Text style={styles.durationText}>
-                      {formatDuration(step.duration)}
-                    </Text>
-                  </View>
-                )}
-                
-                {step.temperature && (
-                  <View style={styles.temperatureContainer}>
-                    <Ionicons name="thermometer-outline" size={16} color={COLORS.textSecondary} />
-                    <Text style={styles.temperatureText}>
-                      {step.temperature}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-            
-            <Text style={[
-              styles.description,
-              isActive && styles.descriptionActive,
-              isCompleted && styles.descriptionCompleted,
-            ]}>
-              {step.description}
-            </Text>
-          </View>
+        ))}
+      </View>
+
+      <View style={styles.right}>
+        <Text style={styles.time}>{time}</Text>
+        <View style={styles.controls}>
+          <Ionicons name="play-skip-back" size={22} color="#fff" />
+          <Ionicons name="play" size={28} color="#fff" style={styles.playIcon} />
+          <Ionicons name="play-skip-forward" size={22} color="#fff" />
         </View>
-      )}
+        <View style={styles.imagePlaceholder} />
+      </View>
     </View>
   );
 };
 
-const styles = createStyles({
-  container: {
-    marginBottom: SPACING.md,
-  },
-  blurContainer: {
-    borderRadius: BORDER_RADIUS.lg,
-    overflow: 'hidden',
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    backgroundColor: '#111',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+    borderColor: '#333',
     borderWidth: 1,
-    borderColor: COLORS.border,
   },
-  fallbackContainer: {
-    borderRadius: BORDER_RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...commonStyles.shadowSm,
+  left: {
+    flex: 2,
   },
-  content: {
-    padding: SPACING.lg,
+  right: {
+    flex: 1,
+    alignItems: 'center',
   },
-  header: {
+  stepTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  stepDesc: {
+    color: '#ccc',
+    fontSize: 14,
+    marginVertical: 4,
+  },
+  ingredientRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.md,
   },
-  stepNumberContainer: {
+  ingredient: {
+    color: '#fff',
+  },
+  quantity: {
+    color: '#ccc',
+  },
+  time: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  controls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
+    gap: 10,
+    marginBottom: 10,
   },
-  stepNumber: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: FONT_WEIGHTS.bold,
+  playIcon: {
+    marginHorizontal: 8,
   },
-  metaContainer: {
-    flexDirection: 'row',
-    gap: SPACING.md,
-  },
-  durationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  durationText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    fontWeight: FONT_WEIGHTS.medium,
-  },
-  temperatureContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  temperatureText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.textSecondary,
-    fontWeight: FONT_WEIGHTS.medium,
-  },
-  description: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.text,
-    lineHeight: 24,
-  },
-  descriptionActive: {
-    color: COLORS.primary,
-    fontWeight: FONT_WEIGHTS.medium,
-  },
-  descriptionCompleted: {
-    color: COLORS.textSecondary,
-    textDecorationLine: 'line-through',
+  imagePlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    borderColor: '#444',
+    borderWidth: 1,
   },
 });
+
+export default StepCard;
