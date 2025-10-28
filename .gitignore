@@ -2,6 +2,8 @@
 
 # dependencies
 node_modules/
+block/
+backend/node_modules/
 
 # Expo
 .expo/

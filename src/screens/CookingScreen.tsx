@@ -1,63 +1,69 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import StepCard from '../components/StepCard';
+import DetailedStepsCard from '../components/DetailedStepsCard';
+import NavigationButtons from '../components/NavigationButtons';
+import ChatWithAI from '../components/ChatWithAI';
 
-import { RootStackParamList } from '../api/types';
-import { COLORS, SPACING, FONT_SIZES, FONT_WEIGHTS } from '../utils/constants';
-import { createStyles, typography } from '../utils/styles';
+const CookingScreen = () => {
+  const [currentStep, setCurrentStep] = useState(1);
 
-type CookingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Cooking'>;
-type CookingScreenRouteProp = RouteProp<RootStackParamList, 'Cooking'>;
+  const steps = [
+    {
+      title: 'Step 1',
+      description: 'Marinate the Chicken with spices',
+      time: '30 sec',
+      ingredients: [
+        { name: 'Chicken Breast', quantity: '200g' },
+        { name: 'Salt', quantity: '1 tsp' },
+        { name: 'Pepper', quantity: '2 tsp' },
+        { name: 'Chilli', quantity: '1/2 tsp' },
+      ],
+      detailedSteps: [
+        '1.a. Wash the chicken',
+        '1.b. Make a paste with the help of spices',
+        '1.c. Mix the chicken well with the paste made',
+      ],
+    },
+  ];
 
-interface Props {
-  navigation: CookingScreenNavigationProp;
-  route: CookingScreenRouteProp;
-}
+  const handleNext = () => {
+    if (currentStep < steps.length) setCurrentStep(currentStep + 1);
+  };
 
-export default function CookingScreen({ navigation, route }: Props) {
-  const { recipeId } = route.params;
+  const handlePrevious = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Cooking Mode</Text>
-        <Text style={styles.subtitle}>Recipe ID: {recipeId}</Text>
-        <Text style={styles.description}>
-          This screen will show step-by-step cooking instructions with AI assistance.
-        </Text>
-      </View>
-    </SafeAreaView>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.heading}>Cooking Steps for the Recipe</Text>
+      <StepCard
+        title={steps[currentStep - 1].title}
+        description={steps[currentStep - 1].description}
+        time={steps[currentStep - 1].time}
+        ingredients={steps[currentStep - 1].ingredients}
+      />
+      <DetailedStepsCard steps={steps[currentStep - 1].detailedSteps} />
+      <NavigationButtons onNext={handleNext} onPrevious={handlePrevious} />
+      <ChatWithAI />
+    </ScrollView>
   );
-}
+};
 
-const styles = createStyles({
+const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
+    flexGrow: 1,
+    backgroundColor: '#000',
+    padding: 20,
   },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-  },
-  title: {
-    fontSize: FONT_SIZES.xxl,
-    fontWeight: FONT_WEIGHTS.bold,
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  subtitle: {
-    fontSize: FONT_SIZES.lg,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.lg,
-  },
-  description: {
-    fontSize: FONT_SIZES.md,
-    color: COLORS.textSecondary,
+  heading: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '600',
     textAlign: 'center',
-    lineHeight: 24,
+    marginVertical: 10,
   },
 });
+
+export default CookingScreen;
