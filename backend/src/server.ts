@@ -1,21 +1,21 @@
+// Load environment variables FIRST before any other imports
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import chatRoutes from './routes/chatRoutes';
 import { errorHandler } from './middleware/errorHandler';
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 console.log('🚀 Starting ChefMate Backend Server...');
 console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-console.log(`🔑 Gemini API Key configured: ${process.env.GEMINI_API_KEY ? 'Yes' : 'No'}`);
+console.log(`🔑 OpenRouter API Key configured: ${process.env.OPENROUTER_API_KEY ? 'Yes' : 'No'}`);
 
 // Security middleware
 app.use(helmet());

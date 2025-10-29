@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { FileSystem } from 'expo-file-system';
+// import { FileSystem } from 'expo-file-system'; // Removed because 'expo-file-system' not found
 import { APP_CONFIG } from './constants';
 
 export interface ImagePickerResult {

@@ -88,6 +88,34 @@ export const FilterSchema = z.object({
   tags: z.array(z.string()).optional(),
 });
 
+// Cooking Mode types for Gemini API integration
+export const DetailedStepSchema = z.object({
+  step_title: z.string(),
+  detailed_steps: z.array(z.string()),
+  estimated_time_minutes: z.number(),
+});
+
+export const CookingDetailsRequestSchema = z.object({
+  recipe: z.object({
+    name: z.string(),
+    description: z.string().optional(),
+    steps: z.array(z.object({
+      stepNumber: z.number(),
+      description: z.string(),
+      duration: z.number().optional(),
+    })),
+    cookTime: z.number(),
+    prepTime: z.number().optional(),
+  }),
+});
+
+export const CookingDetailsResponseSchema = z.object({
+  success: z.boolean(),
+  all_steps: z.array(DetailedStepSchema),
+  timestamp: z.string(),
+  error: z.string().optional(),
+});
+
 // Export TypeScript types
 export type Ingredient = z.infer<typeof IngredientSchema>;
 export type Nutrition = z.infer<typeof NutritionSchema>;
@@ -97,6 +125,9 @@ export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 export type ChatResponse = z.infer<typeof ChatResponseSchema>;
 export type Filter = z.infer<typeof FilterSchema>;
+export type DetailedStep = z.infer<typeof DetailedStepSchema>;
+export type CookingDetailsRequest = z.infer<typeof CookingDetailsRequestSchema>;
+export type CookingDetailsResponse = z.infer<typeof CookingDetailsResponseSchema>;
 
 // Navigation types
 export type RootStackParamList = {
