@@ -1,7 +1,32 @@
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 // API Configuration
-export const API_BASE_URL = Constants.expoConfig?.extra?.backendUrl || 'http://localhost:3000';
+// For Android emulator: use 10.0.2.2 to access host machine
+// For iOS simulator: use localhost
+// For physical devices: use actual IP address of your development machine
+const getApiBaseUrl = () => {
+  console.log('🔧 Platform.OS:', Platform.OS);
+  console.log('🔧 __DEV__:', __DEV__);
+  
+  if (__DEV__) {
+    if (Platform.OS === 'android') {
+      const url = 'http://192.168.29.231:3000';
+      console.log('🔧 Using Android URL:', url);
+      return url;
+    } else {
+      const url = 'http://localhost:3000';
+      console.log('🔧 Using iOS URL:', url);
+      return url;
+    }
+  }
+  const url = Constants.expoConfig?.extra?.backendUrl || 'http://localhost:3000';
+  console.log('🔧 Using production URL:', url);
+  return url;
+};
+
+export const API_BASE_URL = getApiBaseUrl();
+console.log('🔧 Final API_BASE_URL:', API_BASE_URL);
 
 // Theme Colors
 export const COLORS = {

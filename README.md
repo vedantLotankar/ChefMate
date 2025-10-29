@@ -4,16 +4,22 @@ ChefMate is a React Native Expo app that provides an AI-enhanced cooking experie
 
 ## 🚀 Features
 
+### 🆕 **NEW: OpenRouter Integration**
+- **FREE AI API**: No more quota limits or costs
+- **DeepSeek R1 Model**: Advanced reasoning capabilities
+- **Better Performance**: More reliable than previous AI provider
+- **Easy Setup**: Simple API key configuration
+
 ### ✅ Implemented (MVP)
 - **Recipe Discovery**: Browse 8+ dummy recipes with search and filtering
 - **Recipe Details**: View ingredients, nutrition, cooking steps, and serving adjustments
-- **AI Chat Integration**: Contextual chat with Gemini AI for recipe-specific help
+- **AI Chat Integration**: Contextual chat with OpenRouter DeepSeek R1 AI for recipe-specific help
 - **Independent Chat**: General cooking assistance via AI
 - **Glassmorphic UI**: Modern blurred glass design with expo-blur
 - **State Management**: Zustand stores with AsyncStorage persistence
 - **Navigation**: Bottom tabs + stack navigation with TypeScript
 - **Error Handling**: Comprehensive error boundaries and loading states
-- **Backend Proxy**: Secure Express server for Gemini API calls
+- **Backend Proxy**: Secure Express server for OpenRouter API calls
 
 ### 🔄 In Progress
 - **Full Screen Implementation**: Complete RecipeDetail, Cooking, and Chat screens
@@ -45,7 +51,7 @@ ChefMate is a React Native Expo app that provides an AI-enhanced cooking experie
 ### Backend (Node.js/Express)
 - **Runtime**: Node.js with TypeScript
 - **Framework**: Express.js
-- **AI Integration**: Google Gemini API
+- **AI Integration**: OpenRouter API with DeepSeek R1 model
 - **Security**: Helmet, CORS, rate limiting
 - **Logging**: Morgan for request logging
 - **Environment**: dotenv for configuration
@@ -86,7 +92,7 @@ ChefMate/
 - npm or yarn
 - Expo CLI (`npm install -g @expo/cli`)
 - Android Studio (for Android development)
-- Gemini API key (for AI features)
+- OpenRouter API key (for AI features - FREE)
 
 ### 1. Clone and Install
 
@@ -109,13 +115,20 @@ cd ..
 #### Backend Environment
 Create `backend/.env`:
 ```env
-GEMINI_API_KEY=your_gemini_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 PORT=3000
 NODE_ENV=development
 RATE_LIMIT_MAX=100
 RATE_LIMIT_WINDOW_MS=900000
 CORS_ORIGIN=http://localhost:8081
 ```
+
+**Get your FREE OpenRouter API key:**
+1. Go to https://openrouter.ai
+2. Sign up (FREE)
+3. Go to Dashboard → Keys
+4. Create a new API key
+5. Copy the key to your `.env` file
 
 #### Mobile Environment
 Create `.env`:
@@ -208,7 +221,7 @@ Add Recipe Tab
 ## 🔒 Security & Privacy
 
 ### Backend Security
-- **API Key Protection**: Gemini API key stored server-side only
+- **API Key Protection**: OpenRouter API key stored server-side only
 - **Rate Limiting**: Prevents API abuse
 - **Input Validation**: Zod schemas for request validation
 - **CORS**: Configured for specific origins
@@ -248,7 +261,7 @@ npm test
 
 **Backend won't start**:
 - Check if port 3000 is available
-- Verify GEMINI_API_KEY is set
+- Verify OPENROUTER_API_KEY is set
 - Run `npm install` in backend directory
 
 **Mobile app won't load**:
@@ -264,7 +277,7 @@ npm test
 **API calls failing**:
 - Verify backend is running
 - Check network connectivity
-- Verify Gemini API key is valid
+- Verify OpenRouter API key is valid
 - Check rate limiting (429 errors)
 
 ### Debug Mode
@@ -330,4 +343,4 @@ For issues and questions:
 
 ---
 
-**Built with ❤️ using React Native, Expo, and Google Gemini AI**
+**Built with ❤️ using React Native, Expo, and OpenRouter DeepSeek R1 AI**

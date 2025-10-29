@@ -49,15 +49,8 @@ const HomeStack = () => {
         name="Cooking" 
         component={CookingScreen}
         options={{
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: COLORS.surface,
-          },
-          headerTintColor: COLORS.text,
-          headerTitleStyle: {
-            fontSize: FONT_SIZES.lg,
-            fontWeight: FONT_WEIGHTS.semibold,
-          },
+          headerShown: false, // Hide header for full-screen cooking experience
+          tabBarStyle: { display: 'none' }, // Hide bottom tab bar
         }}
       />
       <Stack.Screen 
