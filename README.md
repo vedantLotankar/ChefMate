@@ -94,6 +94,16 @@ ChefMate/
 - Android Studio (for Android development)
 - OpenRouter API key (for AI features - FREE)
 
+### ⚡ Quick Setup Checklist
+
+Before running the app, make sure you:
+1. ✅ Install dependencies (mobile app + backend)
+2. ✅ Create `backend/.env` with OpenRouter API key
+3. ✅ **Configure IP address in `src/utils/constants.ts`** (see Step 3 below)
+4. ✅ Start backend server
+5. ✅ Start Expo development server
+6. ✅ Run app on device/emulator
+
 ### 1. Clone and Install
 
 ```bash
@@ -130,15 +140,94 @@ CORS_ORIGIN=http://localhost:8081
 4. Create a new API key
 5. Copy the key to your `.env` file
 
-#### Mobile Environment
-Create `.env`:
-```env
-BACKEND_URL=http://localhost:3000
-APP_NAME=ChefMate
-APP_VERSION=1.0.0
+### 3. Configure IP Address (IMPORTANT!)
+
+**⚠️ You must configure the IP address before running the app, especially if you switch networks.**
+
+The mobile app needs to know your development machine's IP address to connect to the backend server. This needs to be updated in the code.
+
+#### Step 1: Find Your IP Address
+
+**Windows:**
+```bash
+ipconfig
+```
+Look for `IPv4 Address` under your active network adapter (usually Wi-Fi or Ethernet).
+
+**macOS/Linux:**
+```bash
+ifconfig
+# or
+ip addr show
+```
+Look for `inet` address (usually starts with `192.168.x.x` or `10.x.x.x`).
+
+**Example output:**
+```
+IPv4 Address. . . . . . . . . . . : 192.168.1.100
 ```
 
-### 3. Start Development Servers
+#### Step 2: Update IP Address in Code
+
+Open `src/utils/constants.ts` and update the IP address:
+
+**For Android Emulator:**
+- Use `10.0.2.2` (special IP that always points to host machine)
+- No need to change when switching networks
+
+**For iOS Simulator:**
+- Use `localhost` or `127.0.0.1`
+- No need to change when switching networks
+
+**For Physical Devices (Android/iOS):**
+- Use your machine's actual IP address (e.g., `192.168.1.100`)
+- **You must update this every time you switch networks!**
+
+**Example configuration in `src/utils/constants.ts`:**
+```typescript
+if (__DEV__) {
+  if (Platform.OS === 'android') {
+    // For Android Emulator: use '10.0.2.2'
+    // For Physical Android Device: use your machine's IP (e.g., '192.168.1.100')
+    const url = 'http://192.168.1.100:3000';  // ← Update this IP
+    console.log('🔧 Using Android URL:', url);
+    return url;
+  } else {
+    // For iOS Simulator: use 'localhost'
+    // For Physical iOS Device: use your machine's IP (e.g., '192.168.1.100')
+    const url = 'http://192.168.1.100:3000';  // ← Update this IP
+    console.log('🔧 Using iOS URL:', url);
+    return url;
+  }
+}
+```
+
+#### Step 3: Update Backend Server Binding (Optional but Recommended)
+
+To ensure the backend is accessible from your network, update `backend/src/server.ts`:
+
+```typescript
+// Change from:
+app.listen(PORT, () => {
+
+// To:
+app.listen(PORT, '0.0.0.0', () => {
+```
+
+This makes the server listen on all network interfaces, not just localhost.
+
+#### Quick Reference: IP Configuration by Platform
+
+| Platform | IP Address | Notes |
+|----------|-----------|-------|
+| Android Emulator | `10.0.2.2` | Always use this, never changes |
+| iOS Simulator | `localhost` | Always use this, never changes |
+| Physical Android Device | Your machine's IP | Update when network changes |
+| Physical iOS Device | Your machine's IP | Update when network changes |
+
+**💡 Tip:** If you frequently switch networks, keep a note of common IP ranges you use, or check your IP before each development session.
+
+### 4. Start Development Servers
 
 #### Terminal 1 - Backend Server
 ```bash
@@ -146,12 +235,19 @@ cd backend
 npm run dev
 ```
 
+You should see:
+```
+✅ ChefMate Backend Server running on port 3000
+🌐 Health check: http://localhost:3000/health
+💬 Chat API: http://localhost:3000/api/chat
+```
+
 #### Terminal 2 - Mobile App
 ```bash
 npm start
 ```
 
-### 4. Run on Device
+### 5. Run on Device
 
 - **Android**: Press `a` in the Expo CLI terminal
 - **iOS**: Press `i` in the Expo CLI terminal (requires macOS)
@@ -167,13 +263,30 @@ The backend server runs on port 3000 by default. Key configuration options:
 - **CORS**: Configured for Expo development server
 - **Logging**: Morgan combined format
 - **Security**: Helmet for security headers
+- **Server Binding**: Configure to listen on `0.0.0.0` for network access (see IP Configuration section)
 
 ### Mobile App Configuration
 
-- **API Base URL**: Points to backend server
+- **API Base URL**: Configured in `src/utils/constants.ts` - **must be updated when switching networks**
 - **Blur Effects**: Configurable intensity and platform-specific behavior
 - **Storage**: AsyncStorage for persistence
 - **Navigation**: Bottom tabs + stack navigation
+
+### IP Address Configuration
+
+**Location:** `src/utils/constants.ts`
+
+**When to update:**
+- ✅ Every time you switch Wi-Fi networks
+- ✅ When connecting to a different network (home, office, mobile hotspot)
+- ✅ When your router assigns a new IP address
+- ❌ Not needed for Android Emulator (always use `10.0.2.2`)
+- ❌ Not needed for iOS Simulator (always use `localhost`)
+
+**How to verify your IP is correct:**
+1. Check the console logs when the app starts - it will show the configured URL
+2. Test the backend health endpoint: `http://YOUR_IP:3000/health` in a browser
+3. If you see network errors, verify the IP matches your current network IP
 
 ## 📱 App Architecture
 
@@ -261,28 +374,56 @@ npm test
 
 **Backend won't start**:
 - Check if port 3000 is available
-- Verify OPENROUTER_API_KEY is set
+- Verify OPENROUTER_API_KEY is set in `backend/.env`
 - Run `npm install` in backend directory
+- Check if another process is using port 3000: `lsof -i :3000` (macOS/Linux) or `netstat -ano | findstr :3000` (Windows)
 
 **Mobile app won't load**:
 - Ensure backend is running on port 3000
-- Check BACKEND_URL in .env
 - Clear Expo cache: `expo start -c`
+- Restart the Expo development server
+
+**Network errors / API calls failing**:
+- ✅ **Most common issue**: IP address mismatch
+  - Verify your current IP address matches the one in `src/utils/constants.ts`
+  - Update the IP if you switched networks
+  - For physical devices, ensure both your computer and device are on the same Wi-Fi network
+- Verify backend is running (check Terminal 1)
+- Test backend health endpoint: Open `http://YOUR_IP:3000/health` in a browser
+- Check firewall settings - ensure port 3000 is not blocked
+- For Android Emulator: Use `10.0.2.2` instead of your actual IP
+- For iOS Simulator: Use `localhost` instead of your actual IP
+- Verify OpenRouter API key is valid
+- Check rate limiting (429 errors)
+
+**IP Address Issues**:
+- **"Network Error" in app**: Your IP address in `constants.ts` doesn't match your current network IP
+- **"Connection refused"**: Backend not running or wrong IP address
+- **"Timeout"**: Firewall blocking port 3000 or wrong IP address
+- **Solution**: 
+  1. Find your current IP: `ipconfig` (Windows) or `ifconfig` (macOS/Linux)
+  2. Update `src/utils/constants.ts` with the correct IP
+  3. Restart the Expo app (press `r` in terminal or reload)
 
 **Blur effects not working**:
 - Check BLUR_CONFIG.enabled in constants
 - Verify expo-blur is installed
 - Test on physical device (blur may not work in simulator)
 
-**API calls failing**:
-- Verify backend is running
-- Check network connectivity
-- Verify OpenRouter API key is valid
-- Check rate limiting (429 errors)
-
 ### Debug Mode
 
 Enable debug logging by setting `DEBUG_CONFIG.enableLogs = true` in `src/utils/constants.ts`.
+
+### Network Debugging
+
+When debugging network issues, check the console logs for:
+- `🔧 Platform.OS:` - Shows which platform is running
+- `🔧 Using Android/iOS URL:` - Shows the configured backend URL
+- `🔧 Final API_BASE_URL:` - Shows the final URL being used
+- `📤 API Request:` - Shows outgoing API requests
+- `❌ API Error:` - Shows API errors with status codes
+
+If you see `undefined` in the URL logs, the IP configuration is incorrect.
 
 ## 📊 Performance Considerations
 
