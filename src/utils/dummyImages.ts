@@ -9,7 +9,7 @@ export const DUMMY_IMAGES: Record<string, string> = {
   'avocado-toast': 'https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=800',
   'beef-stir-fry': 'https://images.unsplash.com/photo-1505254179099-0d2f2e48d8f5?w=800',
   'caesar-salad': 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800',
-  'banana-pancakes': 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?w=800',
+  'banana-pancakes': 'https://images.unsplash.com/photo-qp7WA8AV2x0?w=800',
 };
 
 // If you want to use local images instead, replace the URLs with file paths or local require statements
