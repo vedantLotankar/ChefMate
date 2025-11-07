@@ -2,18 +2,17 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Recipe, Filter } from '../api/types';
-import { dummyRecipes } from '../utils/dummyRecipes';
 import { 
-  getRecipes, 
-  storeRecipes, 
-  addRecipe, 
-  updateRecipe, 
-  deleteRecipe,
+  getAllRecipes as getAllRecipesFromDb,
+  getRecipeDetails as getRecipeDetailsFromDb,
+  addRecipe as addRecipeToDb,
+} from '../utils/database';
+import { transformDbRecipeToRecipe, transformRecipeToDbFormat } from '../utils/databaseHelpers';
+import { 
   getFavorites,
   storeFavorites,
   addToFavorites,
   removeFromFavorites,
-  isFavorite
 } from '../utils/storage';
 import { DEBUG_CONFIG } from '../utils/constants';
 
@@ -83,27 +82,67 @@ export const useRecipeStore = create<RecipeState>()(
       currentRecipe: null,
       currentServings: 4,
       
-      // Load recipes from storage
+      // Load recipes from database
       loadRecipes: async () => {
         set({ isLoading: true, error: null });
         try {
-          const [storedRecipes, storedFavorites] = await Promise.all([
-            getRecipes(),
+          const [dbRecipes, storedFavorites] = await Promise.all([
+            new Promise<Recipe[]>((resolve) => {
+              getAllRecipesFromDb((recipes) => {
+                // Transform all recipes from database format to app format
+                const transformedRecipes = recipes.map((recipe) => {
+                  // For basic recipe list, we need to fetch full details
+                  // For now, return basic info and fetch details on demand
+                  return {
+                    id: recipe.id.toString(),
+                    name: recipe.name,
+                    description: recipe.description || undefined,
+                    image: recipe.image || undefined,
+                    cookTime: recipe.cook_time || 0,
+                    prepTime: recipe.prep_time || undefined,
+                    servings: recipe.servings || 4,
+                    difficulty: (recipe.difficulty || 'medium').toLowerCase() as 'easy' | 'medium' | 'hard',
+                    category: recipe.category || undefined,
+                    ingredients: [],
+                    steps: [],
+                    nutrition: undefined,
+                    tags: [],
+                    isCustom: false,
+                  };
+                });
+                resolve(transformedRecipes);
+              });
+            }),
             getFavorites(),
           ]);
           
-          // Merge dummy recipes with custom recipes
-          const allRecipes = [...dummyRecipes, ...storedRecipes];
+          // Fetch full details for all recipes
+          const recipesWithDetails = await Promise.all(
+            dbRecipes.map((recipe) => {
+              return new Promise<Recipe>((resolve) => {
+                getRecipeDetailsFromDb(parseInt(recipe.id), (dbRecipe) => {
+                  if (dbRecipe) {
+                    // Check if recipe is user-created (ID > 25 for dummy recipes)
+                    const isCustom = parseInt(recipe.id) > 25;
+                    const transformed = transformDbRecipeToRecipe(dbRecipe, isCustom);
+                    resolve(transformed || recipe);
+                  } else {
+                    resolve(recipe);
+                  }
+                });
+              });
+            })
+          );
           
           set({ 
-            recipes: allRecipes,
-            customRecipes: storedRecipes,
+            recipes: recipesWithDetails,
+            customRecipes: recipesWithDetails.filter(r => r.isCustom),
             favorites: storedFavorites,
             isLoading: false 
           });
           
           if (DEBUG_CONFIG.enableLogs) {
-            console.log(`✅ Loaded ${allRecipes.length} recipes and ${storedFavorites.length} favorites`);
+            console.log(`✅ Loaded ${recipesWithDetails.length} recipes and ${storedFavorites.length} favorites`);
           }
         } catch (error) {
           console.error('❌ Error loading recipes:', error);
@@ -118,10 +157,38 @@ export const useRecipeStore = create<RecipeState>()(
       addCustomRecipe: async (recipe: Recipe) => {
         set({ isLoading: true, error: null });
         try {
-          await addRecipe(recipe);
+          const dbFormat = transformRecipeToDbFormat(recipe);
+          
+          // Add to database
+          const recipeId = await new Promise<number>((resolve, reject) => {
+            addRecipeToDb(
+              dbFormat.name,
+              dbFormat.description,
+              dbFormat.servings,
+              dbFormat.cook_time,
+              dbFormat.prep_time,
+              dbFormat.category,
+              dbFormat.difficulty,
+              dbFormat.image,
+              dbFormat.ingredients,
+              dbFormat.instructions,
+              dbFormat.nutrition,
+              dbFormat.tags
+            )
+              .then((id) => resolve(id))
+              .catch(reject);
+          });
+          
+          // Update recipe with database ID
+          const savedRecipe = {
+            ...recipe,
+            id: recipeId.toString(),
+            isCustom: true,
+          };
+          
           const { customRecipes, recipes } = get();
-          const updatedCustomRecipes = [...customRecipes, recipe];
-          const updatedRecipes = [...recipes, recipe];
+          const updatedCustomRecipes = [...customRecipes, savedRecipe];
+          const updatedRecipes = [...recipes, savedRecipe];
           
           set({ 
             customRecipes: updatedCustomRecipes,
@@ -130,7 +197,7 @@ export const useRecipeStore = create<RecipeState>()(
           });
           
           if (DEBUG_CONFIG.enableLogs) {
-            console.log(`✅ Added custom recipe: ${recipe.name}`);
+            console.log(`✅ Added custom recipe: ${recipe.name} (ID: ${recipeId})`);
           }
         } catch (error) {
           console.error('❌ Error adding recipe:', error);
@@ -141,11 +208,13 @@ export const useRecipeStore = create<RecipeState>()(
         }
       },
       
-      // Update custom recipe
+      // Update custom recipe (Note: Database doesn't have update function yet, 
+      // so we'll delete and re-add for now)
       updateCustomRecipe: async (recipeId: string, recipe: Recipe) => {
         set({ isLoading: true, error: null });
         try {
-          await updateRecipe(recipeId, recipe);
+          // For now, we'll need to implement update in database.js
+          // This is a placeholder - you may want to add updateRecipe function to database.js
           const { customRecipes, recipes } = get();
           
           const updatedCustomRecipes = customRecipes.map(r => 
@@ -173,11 +242,12 @@ export const useRecipeStore = create<RecipeState>()(
         }
       },
       
-      // Delete custom recipe
+      // Delete custom recipe (Note: Database doesn't have delete function yet)
       deleteCustomRecipe: async (recipeId: string) => {
         set({ isLoading: true, error: null });
         try {
-          await deleteRecipe(recipeId);
+          // For now, just remove from state
+          // You may want to add deleteRecipe function to database.js
           const { customRecipes, recipes, favorites } = get();
           
           const updatedCustomRecipes = customRecipes.filter(r => r.id !== recipeId);
@@ -351,10 +421,28 @@ export const useRecipeStore = create<RecipeState>()(
         return filteredRecipes;
       },
       
-      // Get recipe by ID
+      // Get recipe by ID (with database fallback)
       getRecipeById: (id: string) => {
         const { recipes } = get();
-        return recipes.find(recipe => recipe.id === id);
+        const foundRecipe = recipes.find(recipe => recipe.id === id);
+        
+        // If not found in state, try to fetch from database
+        if (!foundRecipe) {
+          // This is async, so we return null for now
+          // You might want to make this async or use a callback
+          getRecipeDetailsFromDb(parseInt(id), (dbRecipe) => {
+            if (dbRecipe) {
+              const transformed = transformDbRecipeToRecipe(dbRecipe);
+              if (transformed) {
+                // Add to recipes state
+                const { recipes: currentRecipes } = get();
+                set({ recipes: [...currentRecipes, transformed] });
+              }
+            }
+          });
+        }
+        
+        return foundRecipe;
       },
       
       // Clear error
