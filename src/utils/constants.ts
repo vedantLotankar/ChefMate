@@ -2,20 +2,32 @@ import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 // API Configuration
-// For Android emulator: use 10.0.2.2 to access host machine
-// For iOS simulator: use localhost
-// For physical devices: use actual IP address of your development machine
+// ⚠️ IMPORTANT: Update IP address when switching networks!
+// 
+// For Android Emulator: use '10.0.2.2' (never changes)
+// For iOS Simulator: use 'localhost' (never changes)
+// For Physical Devices: use your machine's IP address (update when network changes)
+//
+// To find your IP:
+//   Windows: ipconfig
+//   macOS/Linux: ifconfig or ip addr show
+//
+// See README.md for detailed instructions
 const getApiBaseUrl = () => {
   console.log('🔧 Platform.OS:', Platform.OS);
   console.log('🔧 __DEV__:', __DEV__);
   
   if (__DEV__) {
     if (Platform.OS === 'android') {
-      const url = "http://192.168.29.176:3000";
+      // For Android Emulator: use '10.0.2.2'
+      // For Physical Android Device: use your machine's IP (e.g., '192.168.1.100')
+      const url = 'http://192.168.29.231:3000';  // ← UPDATE THIS IP when switching networks
       console.log('🔧 Using Android URL:', url);
       return url;
     } else {
-      const url = 'http://localhost:3000';
+      // For iOS Simulator: use 'localhost'
+      // For Physical iOS Device: use your machine's IP (e.g., '192.168.1.100')
+      const url = 'http://192.168.29.231:3000';  // ← UPDATE THIS IP when switching networks
       console.log('🔧 Using iOS URL:', url);
       return url;
     }
