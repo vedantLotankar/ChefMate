@@ -12,11 +12,11 @@ interface PlaceholderImageProps {
 }
 
 export const PlaceholderImage: React.FC<PlaceholderImageProps> = ({ 
-  width,
-  height,
+  width = 200, 
+  height = 150, 
   text = 'Image' 
 }) => (
-  <View style={[styles.placeholder, width && height ? { width, height } : styles.fullSize]}>
+  <View style={[styles.placeholder, { width, height }]}>
     <Text style={styles.placeholderText}>{text}</Text>
   </View>
 );
@@ -26,11 +26,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 0, // No border radius when used in card
-  },
-  fullSize: {
-    width: '100%',
-    height: '100%',
+    borderRadius: 8,
   },
   placeholderText: {
     color: COLORS.textSecondary,
